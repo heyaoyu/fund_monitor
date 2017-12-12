@@ -1,2 +1,4 @@
 .idea/
 *.pyc
+cordova/fund_monitor_client/platforms/
+cordova/fund_monitor_client/plugins/
