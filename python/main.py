@@ -18,8 +18,8 @@ def main():
     ]
     app = tornado.web.Application(url_matches)
     app.listen(8888)
-    periodicCb = tornado.ioloop.PeriodicCallback(callback=fund_monitor_check_callback, callback_time=1000)  # 1000 ms
-    periodicCb.start()
+    # periodicCb = tornado.ioloop.PeriodicCallback(callback=fund_monitor_check_callback, callback_time=1000)  # 1000 ms
+    # periodicCb.start()
     tornado.ioloop.IOLoop.current().start()
 
 

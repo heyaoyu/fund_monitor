@@ -33,6 +33,7 @@ class LongPollingHandler(tornado.web.RequestHandler):
     def get(self):
         futrue = source.sample_get_message()
         msg = yield futrue
+        self.set_header("Access-Control-Allow-Origin", "*")
         self.write(msg)
 
 
