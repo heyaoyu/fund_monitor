@@ -23,6 +23,7 @@ class Source(object):
     def push(self, val):
         for future in self.waiters:
             future.set_result(val)
+        self.waiters = set()
 
 
 source = Source()

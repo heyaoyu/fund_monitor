@@ -10,13 +10,13 @@ function poll() {
         timeout: timeout,
         success: function (data, textStatus) {
             output.append("[state: " + textStatus + ", data: { " + data + "} ]<br/>");
-            poll();
             timeout = 5000;
+            poll();
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             error.append("[state: " + textStatus + ", error: " + errorThrown + " ]<br/>");
-            poll();
             timeout += 5000;
+            poll();
         }
     });
 }
