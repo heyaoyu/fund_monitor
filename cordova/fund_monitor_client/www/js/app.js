@@ -1,22 +1,28 @@
-var output = $("#output");
-var error = $("#error");
+var output = $("#output ul");
+var error = $("#error ul");
 
-var timeout = 5000;
+var request_timeout = 60000;
+var timeout;
+var timer = null;
 
 function poll() {
+    if (timer != null) {
+        clearTimeout(timer);
+    }
     $.ajax({
         type: "GET",
-        url: "http://162.219.122.107:8888/long_poll",
-        timeout: timeout,
+        //url: "http://162.219.122.107:8888/long_poll",
+        url: "http://127.0.0.1:8888/long_poll",
+        timeout: request_timeout,
         success: function (data, textStatus) {
-            output.append("[state: " + textStatus + ", data: { " + data + "} ]<br/>");
-            timeout = 5000;
-            poll();
+            output.append("<li>[state: " + textStatus + ", data: { " + data + "} ]</li>");
+            timeout = 0;
+            timer = setTimeout(poll, timeout);
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            error.append("[state: " + textStatus + ", error: " + errorThrown + " ]<br/>");
+            error.append("<li>[state: " + textStatus + ", error: " + errorThrown + " ]</li>");
             timeout += 5000;
-            poll();
+            timer = setTimeout(poll, timeout);
         }
     });
 }

@@ -2,6 +2,7 @@
 __author__ = 'heyaoyu'
 
 import random
+from datetime import timedelta
 
 import tornado.web
 import tornado.gen
@@ -25,6 +26,9 @@ class Source(object):
             future.set_result(val)
         self.waiters = set()
 
+    def clear_timeout_future(self, future):
+        if future in self.waiters:
+            self.waiters.remove(future)
 
 source = Source()
 
@@ -32,10 +36,14 @@ source = Source()
 class LongPollingHandler(tornado.web.RequestHandler):
     @tornado.gen.coroutine
     def get(self):
-        futrue = source.sample_get_message()
-        msg = yield futrue
-        self.set_header("Access-Control-Allow-Origin", "*")
-        self.write(msg)
+        try:
+            futrue = source.sample_get_message()
+            msg = yield tornado.gen.with_timeout(timedelta(seconds=5), futrue)
+            self.set_header("Access-Control-Allow-Origin", "*")
+            self.write(msg)
+        except tornado.gen.TimeoutError, e:
+            print "TimeoutErrorExpected_" + str(len(source.waiters))
+            source.clear_timeout_future(futrue)
 
 
 class PushHandler(tornado.web.RequestHandler):
