@@ -53,3 +53,20 @@ class PushHandler(tornado.web.RequestHandler):
     def get(self):
         val = self.get_argument("value")
         source.push(val)
+
+
+from jobs.callbacks import fund_monitor_check_callback
+
+
+class LongPollingHandlerV2(tornado.web.RequestHandler):
+    @tornado.gen.coroutine
+    def get(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
+        try:
+            futrue = fund_monitor_check_callback.observer.register()
+            msg = yield tornado.gen.with_timeout(timedelta(seconds=5), futrue)
+            self.write(msg)
+        except tornado.gen.TimeoutError, e:
+            print "TimeoutErrorExpected_" + str(len(source.waiters))
+            fund_monitor_check_callback.observer.clear_timeout_future(futrue)
+            self.write("TimeoutError")

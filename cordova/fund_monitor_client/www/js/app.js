@@ -12,7 +12,7 @@ function poll() {
     $.ajax({
         type: "GET",
         //url: "http://162.219.122.107:8888/long_poll",
-        url: "http://127.0.0.1:8888/long_poll",
+        url: "http://127.0.0.1:8888/long_poll_v2",
         timeout: request_timeout,
         success: function (data, textStatus) {
             output.append("<tr><td>" + textStatus + "</td><td>" + data + "</td><td>" + new Date() + "</td></tr>");
