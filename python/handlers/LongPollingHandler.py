@@ -18,7 +18,7 @@ class Source(object):
         # if rand > 5:
         # future.set_result(str(rand))
         # else:
-        #     self.waiters.add(future)
+        # self.waiters.add(future)
         self.waiters.add(future)
         return future
 
@@ -38,10 +38,10 @@ source = Source()
 class LongPollingHandler(tornado.web.RequestHandler):
     @tornado.gen.coroutine
     def get(self):
+        self.set_header("Access-Control-Allow-Origin", "*")
         try:
             futrue = source.sample_get_message()
             msg = yield tornado.gen.with_timeout(timedelta(seconds=5), futrue)
-            self.set_header("Access-Control-Allow-Origin", "*")
             self.write(msg)
         except tornado.gen.TimeoutError, e:
             print "TimeoutErrorExpected_" + str(len(source.waiters))
