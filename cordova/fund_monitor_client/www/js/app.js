@@ -1,8 +1,8 @@
-var output = $("#output ul");
-var error = $("#error ul");
+var output = $("#output table tbody");
+var error = $("#error table tbody");
 
 var request_timeout = 60000;
-var timeout;
+var timeout = 0;
 var timer = null;
 
 function poll() {
@@ -15,12 +15,12 @@ function poll() {
         url: "http://127.0.0.1:8888/long_poll",
         timeout: request_timeout,
         success: function (data, textStatus) {
-            output.append("<li>[state: " + textStatus + ", data: { " + data + "} ]</li>");
+            output.append("<tr><td>" + textStatus + "</td><td>" + data + "</td><td>" + new Date() + "</td></tr>");
             timeout = 0;
             timer = setTimeout(poll, timeout);
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            error.append("<li>[state: " + textStatus + ", error: " + errorThrown + " ]</li>");
+            error.append("<tr><td>" + textStatus + "</td><td>" + errorThrown + "</td><td>" + new Date() + "</td></tr>");
             timeout += 5000;
             timer = setTimeout(poll, timeout);
         }

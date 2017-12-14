@@ -14,11 +14,12 @@ class Source(object):
 
     def sample_get_message(self):
         future = tornado.concurrent.Future()
-        rand = random.randint(1, 10)
-        if rand > 5:
-            future.set_result(str(rand))
-        else:
-            self.waiters.add(future)
+        # rand = random.randint(1, 10)
+        # if rand > 5:
+        # future.set_result(str(rand))
+        # else:
+        #     self.waiters.add(future)
+        self.waiters.add(future)
         return future
 
     def push(self, val):
@@ -29,6 +30,7 @@ class Source(object):
     def clear_timeout_future(self, future):
         if future in self.waiters:
             self.waiters.remove(future)
+
 
 source = Source()
 
@@ -44,6 +46,7 @@ class LongPollingHandler(tornado.web.RequestHandler):
         except tornado.gen.TimeoutError, e:
             print "TimeoutErrorExpected_" + str(len(source.waiters))
             source.clear_timeout_future(futrue)
+            self.write("TimeoutError")
 
 
 class PushHandler(tornado.web.RequestHandler):
