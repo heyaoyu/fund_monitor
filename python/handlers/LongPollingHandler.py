@@ -77,7 +77,7 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
             future1 = fund_003704_monitor_job.register()
             future2 = admin_source.register()
             future = AnyFuture(future1, future2)
-            msg = yield tornado.gen.with_timeout(timedelta(seconds=20), future)
+            msg = yield tornado.gen.with_timeout(timedelta(seconds=10), future)
             self.write(str(msg))
         except tornado.gen.TimeoutError:
             print "TimeoutErrorExpected_" + str(len(fund_003704_monitor_job.waiters))

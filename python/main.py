@@ -23,7 +23,7 @@ def main():
     app.listen(8888)
     # periodicCb = tornado.ioloop.PeriodicCallback(callback=fund_monitor_check_callback, callback_time=1000)  # 1000 ms
     # periodicCb.start()
-    periodicCb2 = tornado.ioloop.PeriodicCallback(callback=fund_003704_monitor_job, callback_time=18000)  # 18000 ms
+    periodicCb2 = tornado.ioloop.PeriodicCallback(callback=fund_003704_monitor_job, callback_time=8000)  # 8000 ms
     periodicCb2.start()
     tornado.ioloop.IOLoop.current().start()
 

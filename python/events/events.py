@@ -14,7 +14,7 @@ class EventSourceMixin(object):
         self.waiters = set()
 
     def register(self):
-        future = tornado.concurrent.Future()
+        future = EventSourceFuture(self)
         self.waiters.add(future)
         return future
 
@@ -22,6 +22,10 @@ class EventSourceMixin(object):
         for future in self.waiters:
             future.set_result(event)
         self.waiters = set()
+
+    def clear(self, future):
+        if future in self.waiters:
+            self.waiters.remove(future)
 
 
 def millsecondsOfNow():
@@ -72,6 +76,17 @@ class AnyFuture(tornado.concurrent.Future):
             future.add_done_callback(self.done_callback)
 
     def done_callback(self, future):
-        if not self.done():
-            ret = [f.result() if f.done() else None for f in self.futures]
-            self.set_result(ret)
+        for f in self.futures:
+            if isinstance(f, EventSourceFuture) and not f.done():
+                f.free()
+        ret = [f.result() if f.done() else None for f in self.futures]
+        self.set_result(ret)
+
+
+class EventSourceFuture(tornado.concurrent.Future):
+    def __init__(self, event_source):
+        self.event_source = event_source
+        super(EventSourceFuture, self).__init__()
+
+    def free(self):
+        self.event_source.clear(self)
