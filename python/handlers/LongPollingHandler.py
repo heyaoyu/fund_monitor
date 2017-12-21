@@ -66,7 +66,7 @@ class LongPollingHandlerV2(tornado.web.RequestHandler):
             self.write("TimeoutError")
 
 
-from events.events import fund_003704_monitor_job, admin_source, AnyFuture
+from events.events import fund_003704_monitor_job, fund_003705_monitor_job, admin_source, AnyFuture
 
 
 class LongPollingHandlerV3(tornado.web.RequestHandler):
@@ -75,8 +75,9 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Origin", "*")
         try:
             future1 = fund_003704_monitor_job.register()
-            future2 = admin_source.register()
-            future = AnyFuture(future1, future2)
+            future2 = fund_003705_monitor_job.register()
+            future3 = admin_source.register()
+            future = AnyFuture(future1, future2, future3)
             msg = yield tornado.gen.with_timeout(timedelta(seconds=10), future)
             self.write(str(msg))
         except tornado.gen.TimeoutError:

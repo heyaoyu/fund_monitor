@@ -8,7 +8,7 @@ from handlers.MainHandler import *
 from handlers.LongPollingHandler import *
 
 from jobs.callbacks import fund_monitor_check_callback
-from events.events import fund_003704_monitor_job
+from events.events import fund_003704_monitor_job, fund_003705_monitor_job
 
 
 def main():
@@ -24,6 +24,8 @@ def main():
     # periodicCb = tornado.ioloop.PeriodicCallback(callback=fund_monitor_check_callback, callback_time=1000)  # 1000 ms
     # periodicCb.start()
     periodicCb2 = tornado.ioloop.PeriodicCallback(callback=fund_003704_monitor_job, callback_time=8000)  # 8000 ms
+    periodicCb2.start()
+    periodicCb2 = tornado.ioloop.PeriodicCallback(callback=fund_003705_monitor_job, callback_time=8000)  # 8000 ms
     periodicCb2.start()
     tornado.ioloop.IOLoop.current().start()
 

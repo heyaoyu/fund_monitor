@@ -55,6 +55,7 @@ class FundMonitorJob(EventSourceMixin):
 
 
 fund_003704_monitor_job = FundMonitorJob("003704")
+fund_003705_monitor_job = FundMonitorJob("003705")
 
 
 class AdminMessageSource(EventSourceMixin):
