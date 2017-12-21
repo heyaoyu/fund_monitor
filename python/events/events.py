@@ -13,8 +13,8 @@ class EventSourceMixin(object):
         self.name = name
         self.waiters = set()
 
-    def register(self):
-        future = EventSourceFuture(self)
+    def register(self, user, important=True):
+        future = EventSourceFuture(self, user, important)
         self.waiters.add(future)
         return future
 
@@ -38,8 +38,8 @@ class FundMonitorJob(EventSourceMixin):
     SUFFIX = "');"
 
     def __init__(self, fund_code):
-        self.fund_code = fund_code
         super(FundMonitorJob, self).__init__(fund_code)
+        self.fund_code = fund_code
 
     @staticmethod
     def to_json(s):
@@ -67,6 +67,7 @@ class AdminMessageSource(EventSourceMixin):
 
 
 admin_source = AdminMessageSource()
+user_msgs = []
 
 
 class AnyFuture(tornado.concurrent.Future):
@@ -77,17 +78,22 @@ class AnyFuture(tornado.concurrent.Future):
             future.add_done_callback(self.done_callback)
 
     def done_callback(self, future):
-        for f in self.futures:
-            if isinstance(f, EventSourceFuture) and not f.done():
-                f.free()
-        ret = [f.result() if f.done() else None for f in self.futures]
-        self.set_result(ret)
+        # for f in self.futures:
+        # if isinstance(f, EventSourceFuture) and not f.done():
+        # f.free()
+        if not self.done():
+            self.set_result(future.result())
+        else:
+            if future.important:
+                user_msgs.append(future.result())
 
 
 class EventSourceFuture(tornado.concurrent.Future):
-    def __init__(self, event_source):
-        self.event_source = event_source
+    def __init__(self, event_source, user, important):
         super(EventSourceFuture, self).__init__()
+        self.event_source = event_source
+        self.user = user
+        self.important = important
 
     def free(self):
         self.event_source.clear(self)
