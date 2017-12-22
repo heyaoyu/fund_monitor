@@ -7,15 +7,13 @@
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *;connect-src *;">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel='shortcut icon' type='image/x-icon' href='favicon.ico'/>
 </head>
 <body>
-<h1>Fund_Monitor_Client</h1>
 
 <div class="container-fluid">
-    <h2>Output:</h2>
-
     <div id="output" class="table-responsive">
-        <table class="table table-bordered">
+        <table class="table table-hover table-bordered">
             <!--<thead>-->
             <!--<th>#</th>-->
             <!--<th>单位净值</th>-->
@@ -23,7 +21,7 @@
             <!--<th>估算值增量</th>-->
             <!--<th>时间</th>-->
             <!--</thead>-->
-            <thead>
+            <thead class="table-primary">
             <tr>
                 <th>状态</th>
                 <th>msg</th>
@@ -33,11 +31,9 @@
             <tbody></tbody>
         </table>
     </div>
-    <h2>Error:</h2>
-
     <div id="error" class="table-responsive">
-        <table class="table table-bordered">
-            <thead>
+        <table class="table table-hover table-bordered">
+            <thead class="table-danger">
             <tr>
                 <th>状态</th>
                 <th>msg</th>
