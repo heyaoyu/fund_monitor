@@ -69,7 +69,8 @@ class AdminMessageSource(EventSourceMixin):
 
 
 admin_source = AdminMessageSource()
-user_msgs = []
+
+from main import user_msgs
 
 
 class AnyFuture(tornado.concurrent.Future):
@@ -90,7 +91,7 @@ class AnyFuture(tornado.concurrent.Future):
                     f.free()
         else:
             if future.important:
-                user_msgs.append(future.result())
+                user_msgs.store_msg_for(future.user, future.result())
 
 
 class EventSourceFuture(tornado.concurrent.Future):

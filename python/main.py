@@ -7,6 +7,10 @@ import tornado.web
 from handlers.MainHandler import *
 from handlers.LongPollingHandler import *
 
+from events.user_msgs import UserMsgs
+
+user_msgs = UserMsgs()
+
 from events.events import fund_003704_monitor_job, fund_003705_monitor_job
 
 

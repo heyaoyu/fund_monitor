@@ -7,8 +7,9 @@ import tornado.web
 import tornado.gen
 import tornado.concurrent
 
+from main import user_msgs
+
 from events.events import fund_003704_monitor_job, fund_003705_monitor_job, admin_source, AnyFuture
-from events.events import user_msgs as UM
 
 
 class LongPollingHandlerV3(tornado.web.RequestHandler):
@@ -16,10 +17,9 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
     def get(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         user = 'user'
-        if UM:
-            global UM
-            self.write(str(UM))
-            UM = []
+        msgs = user_msgs.get_msgs_for(user)
+        if msgs:
+            self.write(str(msgs))
             self.finish()
             return
         try:
