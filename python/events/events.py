@@ -19,6 +19,8 @@ class EventSourceMixin(object):
         return future
 
     def fire(self, event):
+        print str(len(self.waiters)) + ' for ' + self.name
+
         for future in self.waiters:
             future.set_result(event)
         self.waiters = set()
@@ -83,6 +85,9 @@ class AnyFuture(tornado.concurrent.Future):
         # f.free()
         if not self.done():
             self.set_result(future.result())
+            for f in self.futures:
+                if isinstance(f, EventSourceFuture) and not f.done() and not f.important:
+                    f.free()
         else:
             if future.important:
                 user_msgs.append(future.result())
