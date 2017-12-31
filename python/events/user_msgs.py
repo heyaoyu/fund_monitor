@@ -16,9 +16,12 @@ class UserEventSourceMixin(object):
     def fire(self, event):
         print str(len(self.waiters)) + ' for ' + self.name
 
+        has_receiver = False
         for future in self.waiters:
+            has_receiver = True
             future.set_result(event)
         self.waiters = set()
+        return has_receiver
 
     def clear(self, future):
         if future in self.waiters:
@@ -57,12 +60,10 @@ class UserMsgManager(object):
 
     def store_msg_for(self, user, msg):
         msgs = self.all_user_msgs.get(user, [])
-        if msgs:
-            msgs.append(msg)
-        else:
+        if not msgs:
             msgs = UserMsgs(user)
-            msgs.append(msg)
-        self.all_user_msgs[user] = msgs
+            self.all_user_msgs[user] = msgs
+        msgs.append(msg)
 
 
 class UserMsgs(UserEventSourceMixin):
@@ -72,8 +73,9 @@ class UserMsgs(UserEventSourceMixin):
         self.msgs = []
 
     def append(self, msg):
-        self.msgs.append(msg)
-        self.fire(msg)
+        has_receiver = self.fire(msg)
+        if not has_receiver:
+            self.msgs.append(msg)
 
     def get_msgs(self):
         ret = self.msgs

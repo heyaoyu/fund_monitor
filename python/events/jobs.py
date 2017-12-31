@@ -46,7 +46,7 @@ class AdminMessageSource(object):
         super(AdminMessageSource, self).__init__()
 
     def send_msg(self, msg):
-        user_msg_manager.send_users_msg('all', msg)
+        user_msg_manager.store_users_msg('all', msg)
 
 
 admin_source = AdminMessageSource()
