@@ -25,7 +25,7 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
         try:
             future1 = fund_003704_monitor_job.register(user)
             future2 = fund_003705_monitor_job.register(user)
-            future3 = admin_source.register(user, False)
+            future3 = admin_source.register(user, important=False)
             future = AnyFuture(future1, future2, future3)
             msg = yield tornado.gen.with_timeout(timedelta(seconds=10), future)
             self.write(str(msg))
