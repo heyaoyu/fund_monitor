@@ -7,9 +7,8 @@ import tornado.web
 import tornado.gen
 import tornado.concurrent
 
-from main import user_msgs
-
-from events.events import fund_003704_monitor_job, fund_003705_monitor_job, admin_source, AnyFuture
+from main import user_msg_manager
+from events.jobs import admin_source
 
 
 class LongPollingHandlerV3(tornado.web.RequestHandler):
@@ -17,20 +16,17 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
     def get(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         user = 'user'
-        msgs = user_msgs.get_msgs_for(user)
+        msgs = user_msg_manager.get_msgs_for(user)
         if msgs:
             self.write(str(msgs))
             self.finish()
             return
         try:
-            future1 = fund_003704_monitor_job.register(user)
-            future2 = fund_003705_monitor_job.register(user)
-            future3 = admin_source.register(user, important=False)
-            future = AnyFuture(future1, future2, future3)
+            future = user_msg_manager.get_msgs_future_for(user)
             msg = yield tornado.gen.with_timeout(timedelta(seconds=10), future)
             self.write(str(msg))
         except tornado.gen.TimeoutError:
-            print "TimeoutErrorExpected_" + str(len(fund_003704_monitor_job.waiters))
+            print "TimeoutErrorExpected_" + str(len(user_msg_manager.get_msgs_for(user).waiters))
             self.write("TimeoutError")
         self.finish()
 
