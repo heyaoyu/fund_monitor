@@ -10,6 +10,23 @@ import json
 
 from main import user_msg_manager
 
+from datetime import timedelta, datetime
+
+
+def is_A_market_opening():
+    utc_ts = datetime.utcnow()
+    bj_ts = utc_ts + timedelta(hours=8)
+    if bj_ts.weekday() + 1 in [6, 7]:
+        return False
+    _9_30 = bj_ts.replace(hour=9, minute=30, second=0, microsecond=0)
+    _11_30 = bj_ts.replace(hour=11, minute=30, second=0, microsecond=0)
+    _13_00 = bj_ts.replace(hour=13, minute=0, second=0, microsecond=0)
+    _15_00 = bj_ts.replace(hour=15, minute=0, second=0, microsecond=0)
+    if (_9_30 <= bj_ts and bj_ts <= _11_30) or (_13_00 <= bj_ts and bj_ts <= _15_00):
+        return True
+    else:
+        return False
+
 
 def millsecondsOfNow():
     return (int(round(time.time() * 1000)))
@@ -32,6 +49,8 @@ class FundMonitorJob(object):
         return "{" + s[len(FundMonitorJob.PREFIX):len(s) - len(FundMonitorJob.SUFFIX)] + "}";
 
     def __call__(self, *args, **kwargs):
+        if not is_A_market_opening():
+            return
         url = FundMonitorJob.FUND_URL_TEMPLATE.format(fund_code=self.fund_code, ts=millsecondsOfNow())
         response_str = urllib2.urlopen(url).read()
         json_str = FundMonitorJob.to_json(response_str)
