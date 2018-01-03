@@ -32,6 +32,23 @@ class UserEventSourceMixin(object):
             self.waiters.remove(future)
 
 
+class UserMsgs(UserEventSourceMixin):
+    def __init__(self, username):
+        super(UserMsgs, self).__init__(username)
+        self.username = username
+        self.msgs = []
+
+    def append(self, msg):
+        has_receiver = self.fire(msg)
+        if not has_receiver:
+            self.msgs.append(msg)
+
+    def get_msgs(self):
+        ret = self.msgs
+        self.msgs = []
+        return ret
+
+
 # in-memory user related msgs container
 class UserMsgManager(object):
     def __init__(self):
@@ -68,20 +85,3 @@ class UserMsgManager(object):
             msgs = UserMsgs(user)
             self.all_user_msgs[user] = msgs
         msgs.append(msg)
-
-
-class UserMsgs(UserEventSourceMixin):
-    def __init__(self, username):
-        super(UserMsgs, self).__init__(username)
-        self.username = username
-        self.msgs = []
-
-    def append(self, msg):
-        has_receiver = self.fire(msg)
-        if not has_receiver:
-            self.msgs.append(msg)
-
-    def get_msgs(self):
-        ret = self.msgs
-        self.msgs = []
-        return ret
