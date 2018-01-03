@@ -61,7 +61,7 @@ class FundMonitorJob(object):
 
     def __call__(self, *args, **kwargs):
         if not is_A_market_opening():
-        return
+            return
         url = FundMonitorJob.FUND_URL_TEMPLATE.format(fund_code=self.fund_code, ts=millsecondsOfNow())
         response_str = urllib2.urlopen(url).read()
         json_str = FundMonitorJob.to_json(response_str)
