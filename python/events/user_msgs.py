@@ -1,5 +1,9 @@
 # -*- coding:utf-8 -*-
 __author__ = 'heyaoyu'
+
+import logging
+
+logger = logging.getLogger()
 import tornado.concurrent
 
 
@@ -14,7 +18,7 @@ class UserEventSourceMixin(object):
         return future
 
     def fire(self, event):
-        print str(len(self.waiters)) + ' for ' + self.name
+        logger.info(str(len(self.waiters)) + ' for ' + self.name)
 
         has_receiver = False
         for future in self.waiters:

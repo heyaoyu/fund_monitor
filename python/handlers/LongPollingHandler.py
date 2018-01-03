@@ -1,6 +1,10 @@
 # -*- coding:utf-8 -*-
 __author__ = 'heyaoyu'
 
+import logging
+
+logger = logging.getLogger()
+
 from datetime import timedelta
 
 import tornado.web
@@ -26,7 +30,7 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
             msg = yield tornado.gen.with_timeout(timedelta(seconds=10), future)
             self.write(str(msg))
         except tornado.gen.TimeoutError:
-            print "TimeoutErrorExpected_" + str(len(user_msg_manager.get_msgs_for(user).waiters))
+            logger.error("TimeoutErrorExpected_" + str(len(user_msg_manager.get_msgs_for(user).waiters)))
             self.write("TimeoutError")
         self.finish()
 

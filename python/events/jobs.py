@@ -1,6 +1,9 @@
 # -*- coding:utf-8 -*-
 __author__ = 'heyaoyu'
 
+import logging
+
+logger = logging.getLogger()
 import urllib2
 import time
 import json
@@ -33,7 +36,7 @@ class FundMonitorJob(object):
         response_str = urllib2.urlopen(url).read()
         json_str = FundMonitorJob.to_json(response_str)
         json_object = json.loads(json_str)
-        print u'估值时间:' + json_object['gztime'] + u'_单位净值:' + json_object['dwjz'] + u'_估算值:' + json_object['gsz']
+        logger.info(u'估值时间:' + json_object['gztime'] + u'_单位净值:' + json_object['dwjz'] + u'_估算值:' + json_object['gsz'])
         user_msg_manager.store_users_msg(self.users, json_str)
 
 

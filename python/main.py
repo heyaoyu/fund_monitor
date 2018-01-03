@@ -1,6 +1,12 @@
 # -*- coding:utf-8 -*-
 __author__ = 'heyaoyu'
 
+import os
+import logging.config
+
+log_path = os.path.join(os.path.dirname(__file__), 'logging.conf')
+logging.config.fileConfig(log_path)
+
 import tornado.ioloop
 import tornado.web
 import tornado.gen
