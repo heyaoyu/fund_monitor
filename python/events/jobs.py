@@ -59,10 +59,6 @@ class FundMonitorJob(object):
         user_msg_manager.store_users_msg(self.users, json_str)
 
 
-fund_003704_monitor_job = FundMonitorJob("003704")
-fund_003705_monitor_job = FundMonitorJob("003705")
-
-
 class AdminMessageSource(object):
     def __init__(self):
         super(AdminMessageSource, self).__init__()
