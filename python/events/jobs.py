@@ -32,6 +32,17 @@ def millsecondsOfNow():
     return (int(round(time.time() * 1000)))
 
 
+class UserDataHandler(object):
+    def __init__(self, user, min, max):
+        self.user = user
+        self.min = min
+        self.max = max
+
+    def shouldTake(self, data):
+        if data <= self.min or data >= self.max:
+            return True
+
+
 class FundMonitorJob(object):
     FUND_URL_TEMPLATE = "http://fundgz.1234567.com.cn/js/{fund_code}.js?rt={ts}"
     PREFIX = "jsonpgz('"
@@ -41,8 +52,8 @@ class FundMonitorJob(object):
         super(FundMonitorJob, self).__init__()
         self.fund_code = fund_code
 
-    def attach(self, users):
-        self.users = users
+    def attach(self, user_data_handlers):
+        self.user_data_handlers = user_data_handlers
 
     @staticmethod
     def to_json(s):
@@ -50,13 +61,17 @@ class FundMonitorJob(object):
 
     def __call__(self, *args, **kwargs):
         if not is_A_market_opening():
-            return
+        return
         url = FundMonitorJob.FUND_URL_TEMPLATE.format(fund_code=self.fund_code, ts=millsecondsOfNow())
         response_str = urllib2.urlopen(url).read()
         json_str = FundMonitorJob.to_json(response_str)
         json_object = json.loads(json_str)
         logger.info(u'估值时间:' + json_object['gztime'] + u'_单位净值:' + json_object['dwjz'] + u'_估算值:' + json_object['gsz'])
-        user_msg_manager.store_users_msg(self.users, json_str)
+        users = []
+        for user_data_handler in self.user_data_handlers:
+            if user_data_handler.shouldTake(float(json_object['gsz'])):
+                users.append(user_data_handler.user)
+        user_msg_manager.store_users_msg(users, json_str)
 
 
 class AdminMessageSource(object):

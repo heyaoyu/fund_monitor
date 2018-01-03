@@ -18,15 +18,17 @@ user_msg_manager = UserMsgManager()
 from handlers.MainHandler import *
 from handlers.LongPollingHandler import *
 
-from events.jobs import FundMonitorJob
+from events.jobs import FundMonitorJob, UserDataHandler
 
 
 def load_jobs():
+    db_path = os.path.join(os.path.dirname(__file__), 'userjob_sample.db')
+
     fund_003704_monitor_job = FundMonitorJob("003704")
-    fund_003704_monitor_job.attach(['user'])
+    fund_003704_monitor_job.attach([UserDataHandler('ludi', 1.05, 1.1), UserDataHandler('heyaoyu', 1.02, 1.05)])
     tornado.ioloop.PeriodicCallback(callback=fund_003704_monitor_job, callback_time=10000).start()  # 10s
     fund_003705_monitor_job = FundMonitorJob("003705")
-    fund_003705_monitor_job.attach(['user'])
+    fund_003705_monitor_job.attach([UserDataHandler('heyaoyu', 0.8, 1.0)])
     tornado.ioloop.PeriodicCallback(callback=fund_003705_monitor_job, callback_time=10000).start()  # 10s
 
 

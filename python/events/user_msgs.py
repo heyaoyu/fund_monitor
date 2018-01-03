@@ -62,20 +62,19 @@ class UserMsgManager(object):
             for user in users:
                 self.store_msg_for(user, msg)
 
-    def get_msgs_for(self, user):
-        msgs = self.all_user_msgs.get(user, [])
-        if msgs:
-            ret = msgs.get_msgs()
-        else:
-            ret = UserMsgs(user)
-            self.all_user_msgs[user] = ret
-        return ret
-
-    def get_msgs_future_for(self, user):
+    def get_msgs_object_for(self, user):
         msgs = self.all_user_msgs.get(user, [])
         if not msgs:
             msgs = UserMsgs(user)
             self.all_user_msgs[user] = msgs
+        return msgs
+
+    def get_msgs_for(self, user):
+        msgs = self.get_msgs_object_for(user)
+        return msgs.msgs
+
+    def get_msgs_future_for(self, user):
+        msgs = self.get_msgs_object_for(user)
         future = msgs.register()
         return future
 
