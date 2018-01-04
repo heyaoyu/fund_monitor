@@ -46,14 +46,26 @@ def millsecondsOfNow():
 
 
 class UserDataHandler(object):
-    def __init__(self, user, min, max):
+    def __init__(self, user, min, max, interval=500):
         self.user = user
         self.min = min
         self.max = max
+        self.interval = interval
+        self.last_sent = None
 
     def shouldTake(self, data):
-        if data <= self.min or data >= self.max:
+        # at least 1 msg per day
+        utc_ts = datetime.utcnow()
+        bj_ts = utc_ts + timedelta(hours=8)
+        _15_00 = bj_ts.replace(hour=15, minute=0, second=0, microsecond=0)
+        delta = _15_00 - bj_ts
+        if delta.total_seconds() > 0 and delta.total_seconds() <= 60:
             return True
+        if self.last_sent is None or bj_ts - self.last_sent > self.interval:
+            if data <= self.min or data >= self.max:
+                self.last_sent = bj_ts
+                return True
+        return False
 
 
 class FundMonitorJob(object):
