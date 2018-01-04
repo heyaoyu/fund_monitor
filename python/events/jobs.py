@@ -48,9 +48,9 @@ def millsecondsOfNow():
 class UserDataHandler(object):
     def __init__(self, user, min, max, interval=500):
         self.user = user
-        self.min = min
-        self.max = max
-        self.interval = interval
+        self.min = float(min)
+        self.max = float(max)
+        self.interval = float(interval)
         self.last_sent = None
 
     def shouldTake(self, data):
@@ -61,7 +61,7 @@ class UserDataHandler(object):
         delta = _15_00 - bj_ts
         if delta.total_seconds() > 0 and delta.total_seconds() <= 60:
             return True
-        if self.last_sent is None or bj_ts - self.last_sent > self.interval:
+        if self.last_sent is None or (bj_ts - self.last_sent).total_seconds() > self.interval:
             if data <= self.min or data >= self.max:
                 self.last_sent = bj_ts
                 return True
@@ -96,7 +96,9 @@ class FundMonitorJob(object):
         for user_data_handler in self.user_data_handlers:
             if user_data_handler.shouldTake(float(json_object['gsz'])):
                 users.append(user_data_handler.user)
-        user_msg_manager.store_users_msg(users, json_str)
+                json_object['max'] = user_data_handler.max
+                json_object['min'] = user_data_handler.min
+        user_msg_manager.store_users_msg(users, json.dumps(json_object))
 
 
 class AdminMessageSource(object):
