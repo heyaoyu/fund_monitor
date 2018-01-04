@@ -91,7 +91,9 @@ class FundMonitorJob(object):
         response_str = urllib2.urlopen(url).read()
         json_str = FundMonitorJob.to_json(response_str)
         json_object = json.loads(json_str)
-        logger.info(u'估值时间:' + json_object['gztime'] + u'_单位净值:' + json_object['dwjz'] + u'_估算值:' + json_object['gsz'])
+        logger.info(json_str)
+        if not json_object:
+            return
         users = []
         for user_data_handler in self.user_data_handlers:
             if user_data_handler.shouldTake(float(json_object['gsz'])):
