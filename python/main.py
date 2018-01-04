@@ -44,6 +44,7 @@ def main():
     url_matches = [
         (r'/', MainHandler),
         (r'/long_poll_v3', LongPollingHandlerV3),
+        (r'/msgs', WatchAndKeepMsgHandler),
         (r'/push', PushHandler),
     ]
     app = tornado.web.Application(url_matches)
