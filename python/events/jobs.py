@@ -73,7 +73,7 @@ class FundMonitorJob(object):
         return "{" + s[len(FundMonitorJob.PREFIX):len(s) - len(FundMonitorJob.SUFFIX)] + "}";
 
     def __call__(self, *args, **kwargs):
-        if not can_stock_fund_monitor():
+        if not is_A_market_opening():
             return
         url = FundMonitorJob.FUND_URL_TEMPLATE.format(fund_code=self.fund_code, ts=millsecondsOfNow())
         response_str = urllib2.urlopen(url).read()
