@@ -26,13 +26,18 @@ from events.jobs import FundMonitorJob, UserDataHandler
 
 def load_jobs():
     db_path = os.path.join(os.path.dirname(__file__), 'userjob_sample.db')
-
-    fund_003704_monitor_job = FundMonitorJob("003704")
-    fund_003704_monitor_job.attach([UserDataHandler('ludi', 1.05, 1.1), UserDataHandler('heyaoyu', 1.02, 1.05)])
-    tornado.ioloop.PeriodicCallback(callback=fund_003704_monitor_job, callback_time=60000).start()  # 60s
-    fund_003705_monitor_job = FundMonitorJob("003705")
-    fund_003705_monitor_job.attach([UserDataHandler('heyaoyu', 0.8, 1.0)])
-    tornado.ioloop.PeriodicCallback(callback=fund_003705_monitor_job, callback_time=60000).start()  # 60s
+    file = open(db_path, 'r')
+    fund_jobs = {}
+    for line in file.readlines():
+        user, fund_code, min, max = line.split('_')
+        if fund_code in fund_jobs.keys():
+            fund_jobs[fund_code].append(UserDataHandler(user, min, max))
+        else:
+            fund_jobs[fund_code] = [UserDataHandler(user, min, max)]
+    for fund_code, userdatahandlers in fund_jobs.items():
+        job = FundMonitorJob(fund_code)
+        job.attach(userdatahandlers)
+        tornado.ioloop.PeriodicCallback(callback=job, callback_time=60000).start()  # 60s
 
 
 def main():
