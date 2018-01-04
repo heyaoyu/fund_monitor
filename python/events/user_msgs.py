@@ -72,9 +72,7 @@ class UserMsgManager(object):
 
     def get_msgs_for(self, user):
         msgs = self.get_msgs_object_for(user)
-        ret = msgs.msgs
-        msgs.msgs = []
-        return ret
+        return msgs.get_msgs()
 
     def get_msgs_future_for(self, user):
         msgs = self.get_msgs_object_for(user)
