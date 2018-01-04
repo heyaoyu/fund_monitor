@@ -28,6 +28,19 @@ def is_A_market_opening():
         return False
 
 
+def can_stock_fund_monitor():
+    utc_ts = datetime.utcnow()
+    bj_ts = utc_ts + timedelta(hours=8)
+    if bj_ts.weekday() + 1 in [6, 7]:
+        return False
+    _14_30 = bj_ts.replace(hour=14, minute=30, second=0, microsecond=0)
+    _15_00 = bj_ts.replace(hour=15, minute=0, second=0, microsecond=0)
+    if _14_30 <= bj_ts and bj_ts <= _15_00:
+        return True
+    else:
+        return False
+
+
 def millsecondsOfNow():
     return (int(round(time.time() * 1000)))
 
@@ -60,7 +73,7 @@ class FundMonitorJob(object):
         return "{" + s[len(FundMonitorJob.PREFIX):len(s) - len(FundMonitorJob.SUFFIX)] + "}";
 
     def __call__(self, *args, **kwargs):
-        if not is_A_market_opening():
+        if not can_stock_fund_monitor():
             return
         url = FundMonitorJob.FUND_URL_TEMPLATE.format(fund_code=self.fund_code, ts=millsecondsOfNow())
         response_str = urllib2.urlopen(url).read()
