@@ -18,7 +18,7 @@ class UserEventSourceMixin(object):
         return future
 
     def fire(self, event):
-        logger.info(str(len(self.waiters)) + ' for ' + self.name)
+        logger.debug('waiters#' + str(len(self.waiters)) + ' for ' + self.name)
 
         has_receiver = False
         for future in self.waiters:
@@ -39,6 +39,7 @@ class UserMsgs(UserEventSourceMixin):
         self.msgs = []
 
     def append(self, msg):
+        logger.info('record msg for ' + self.username)
         has_receiver = self.fire(msg)
         if not has_receiver:
             self.msgs.append(msg)
