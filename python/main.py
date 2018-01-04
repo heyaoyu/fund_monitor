@@ -6,6 +6,9 @@ import logging.config
 
 log_path = os.path.join(os.path.dirname(__file__), 'logging.conf')
 logging.config.fileConfig(log_path)
+logging.getLogger("tornado.access").disabled = False
+logging.getLogger("tornado.application").disabled = False
+logging.getLogger("tornado.general").disabled = False
 
 import tornado.ioloop
 import tornado.web
