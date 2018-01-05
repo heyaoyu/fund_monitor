@@ -4,6 +4,8 @@ __author__ = 'heyaoyu'
 import logging
 
 logger = logging.getLogger()
+import json
+import os
 import tornado.concurrent
 
 
@@ -33,10 +35,10 @@ class UserEventSourceMixin(object):
 
 
 class UserMsgs(UserEventSourceMixin):
-    def __init__(self, username):
+    def __init__(self, username, msgs=[]):
         super(UserMsgs, self).__init__(username)
         self.username = username
-        self.msgs = []
+        self.msgs = msgs
 
     def append(self, msg):
         logger.info('record msg for ' + self.username)
@@ -57,6 +59,31 @@ class UserMsgs(UserEventSourceMixin):
 class UserMsgManager(object):
     def __init__(self):
         self.all_user_msgs = {}
+
+    def load(self, file):
+        try:
+            store = open(file, 'r')
+            data_dict = json.load(store, encoding="utf-8")
+            for k, v in data_dict.items():  # k username v msgs
+                self.all_user_msgs[k] = UserMsgs(k, v)
+            store.close()
+        except Exception, e:
+            logger.error(e)
+
+    def dump(self, file):
+        try:
+            tmp = file + '.tmp'
+            tmpFile = open(tmp, 'w')
+            data_dict = {}
+            for k, v in self.all_user_msgs.items():
+                data_dict[k] = v.msgs
+            json.dump(data_dict, tmpFile)
+            tmpFile.close()
+            if os.path.exists(file):
+                os.remove(file)
+            os.rename(tmp, file)
+        except Exception, e:
+            logger.error(e)
 
     def store_users_msg(self, users, msg):
         if users == 'all':

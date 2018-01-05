@@ -26,7 +26,15 @@ from handlers.LongPollingHandler import *
 from events.jobs import FundMonitorJob, UserDataHandler
 
 
-def load_jobs():
+def init_user_msg_job():
+    user_msg_store_path = os.path.join(os.path.dirname(__file__), 'user_msg.store')
+    if os.path.exists(user_msg_store_path):
+        user_msg_manager.load(user_msg_store_path)
+    tornado.ioloop.PeriodicCallback(callback=lambda: user_msg_manager.dump(user_msg_store_path),
+                                    callback_time=5000).start()  # 5s
+
+
+def load_user_jobs():
     db_path = os.path.join(os.path.dirname(__file__), 'userjob_sample.db')
     file = open(db_path, 'r')
     fund_jobs = {}
@@ -40,6 +48,7 @@ def load_jobs():
         job = FundMonitorJob(fund_code)
         job.attach(userdatahandlers)
         tornado.ioloop.PeriodicCallback(callback=job, callback_time=60000).start()  # 60s
+    file.close()
 
 
 def main():
@@ -51,7 +60,8 @@ def main():
     ]
     app = tornado.web.Application(url_matches)
     app.listen(8888)
-    load_jobs()
+    init_user_msg_job()
+    load_user_jobs()
     tornado.ioloop.IOLoop.current().start()
 
 
