@@ -3,9 +3,11 @@ __author__ = 'heyaoyu'
 
 import os
 import logging.config
+import time
 
 log_path = os.path.join(os.path.dirname(__file__), 'logging.conf')
 logging.config.fileConfig(log_path)
+logging.Formatter.converter = time.gmtime
 logging.getLogger("tornado.access").disabled = False
 logging.getLogger("tornado.application").disabled = False
 logging.getLogger("tornado.general").disabled = False
