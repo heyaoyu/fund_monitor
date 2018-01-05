@@ -44,10 +44,13 @@ class UserMsgs(UserEventSourceMixin):
         if not has_receiver:
             self.msgs.append(msg)
 
-    def get_msgs(self):
+    def get_msgs_clear(self):
         ret = self.msgs
         self.msgs = []
         return ret
+
+    def get_msgs(self):
+        return self.msgs
 
 
 # in-memory user related msgs container
@@ -73,6 +76,10 @@ class UserMsgManager(object):
     def get_msgs_for(self, user):
         msgs = self.get_msgs_object_for(user)
         return msgs.get_msgs()
+
+    def get_msgs_clear_for(self, user):
+        msgs = self.get_msgs_object_for(user)
+        return msgs.get_msgs_clear()
 
     def get_msgs_future_for(self, user):
         msgs = self.get_msgs_object_for(user)

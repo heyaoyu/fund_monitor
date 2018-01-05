@@ -20,7 +20,7 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
     def get(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         user = self.get_argument("user", "user")
-        msgs = user_msg_manager.get_msgs_for(user)
+        msgs = user_msg_manager.get_msgs_clear_for(user)
         if msgs:
             self.write(str(msgs))
             self.finish()
