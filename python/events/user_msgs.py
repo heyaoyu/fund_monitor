@@ -65,6 +65,7 @@ class UserMessageManager(object):
         # username -> messages
         self.all_user_msessages = {}
 
+    # called by init
     def load(self, store_file_path):
         try:
             store = open(store_file_path, 'r')
@@ -75,6 +76,7 @@ class UserMessageManager(object):
         except Exception, e:
             logger.error(e)
 
+    # called repeatedly to keep message
     def dump(self, store_file_path):
         try:
             tmp_path = store_file_path + '.tmp'
@@ -90,6 +92,7 @@ class UserMessageManager(object):
         except Exception, e:
             logger.error(e)
 
+    # for msg to multiple users, job.py
     def store_users_message(self, users, msg):
         if users == 'all':
             for user in self.all_user_msessages.keys():
@@ -98,6 +101,13 @@ class UserMessageManager(object):
             for user in users:
                 self.store_user_message_for(user, msg)
 
+    # called only by self.store_users_message so far
+    def store_user_message_for(self, user, msg):
+        user_msgs_obj = self.get_user_messages_object_for(user)
+        self.all_user_msessages[user] = user_msgs_obj
+        user_msgs_obj.append_message(msg)
+
+    # called by handlers
     def get_user_messages_object_for(self, user):
         user_msgs_obj = self.all_user_msessages.get(user, [])
         if not user_msgs_obj:
@@ -105,20 +115,18 @@ class UserMessageManager(object):
             self.all_user_msessages[user] = user_msgs_obj
         return user_msgs_obj
 
+    # called by handlers
     def get_user_messages_object_messages_for(self, user):
         user_msgs_obj = self.get_user_messages_object_for(user)
         return user_msgs_obj.get_messages()
 
+    # called by handlers
     def pop_user_messages_object_messages_for(self, user):
         user_msgs_obj = self.get_user_messages_object_for(user)
         return user_msgs_obj.pop_messages()
 
+    # called by handlers
     def get_user_messages_object_future_for(self, user):
         user_msgs_obj = self.get_user_messages_object_for(user)
         future = user_msgs_obj.register()
         return future
-
-    def store_user_message_for(self, user, msg):
-        user_msgs_obj = self.get_user_messages_object_for(user)
-        self.all_user_msessages[user] = user_msgs_obj
-        user_msgs_obj.append_message(msg)
