@@ -20,17 +20,18 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
     def get(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         user = self.get_argument("user", "user")
-        msgs = user_msg_manager.get_msgs_clear_for(user)
+        msgs = user_msg_manager.pop_user_messages_object_messages_for(user)
         if msgs:
             self.write(str(msgs))
             self.finish()
             return
         try:
-            future = user_msg_manager.get_msgs_future_for(user)
+            future = user_msg_manager.get_user_messages_object_future_for(user)
             msg = yield tornado.gen.with_timeout(timedelta(seconds=10), future)
             self.write(str(msg))
         except tornado.gen.TimeoutError:
-            logger.error("TimeoutErrorExpected_" + str(len(user_msg_manager.get_msgs_object_for(user).waiters)))
+            logger.error(
+                "TimeoutErrorExpected_" + str(len(user_msg_manager.get_user_messages_object_for(user).waiters)))
             self.write("TimeoutError")
         self.finish()
 
@@ -39,7 +40,7 @@ class WatchAndKeepMsgHandler(tornado.web.RequestHandler):
     def get(self):
         self.set_header("Access-Control-Allow-Origin", "*")
         user = self.get_argument("user", "user")
-        msgs = user_msg_manager.get_msgs_for(user)
+        msgs = user_msg_manager.get_user_messages_object_messages_for(user)
         if msgs:
             self.write(str(msgs))
         self.finish()

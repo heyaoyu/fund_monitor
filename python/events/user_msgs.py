@@ -9,9 +9,8 @@ import os
 import tornado.concurrent
 
 
-class UserEventSourceMixin(object):
-    def __init__(self, name):
-        self.name = name
+class EventSourceMixin(object):
+    def __init__(self):
         self.waiters = set()
 
     def register(self):
@@ -19,13 +18,13 @@ class UserEventSourceMixin(object):
         self.waiters.add(future)
         return future
 
-    def fire(self, event):
-        logger.debug('waiters#' + str(len(self.waiters)) + ' for ' + self.name)
+    def fire(self, data):
+        logger.debug('waiters#' + str(len(self.waiters)))
 
         has_receiver = False
         for future in self.waiters:
             has_receiver = True
-            future.set_result(event)
+            future.set_result(data)
         self.waiters = set()
         return has_receiver
 
@@ -34,88 +33,92 @@ class UserEventSourceMixin(object):
             self.waiters.remove(future)
 
 
-class UserMsgs(UserEventSourceMixin):
-    def __init__(self, username, msgs=[]):
-        super(UserMsgs, self).__init__(username)
+class UserEventSourceMixin(EventSourceMixin):
+    def __init__(self, username):
+        super(UserEventSourceMixin, self).__init__()
         self.username = username
-        self.msgs = msgs
 
-    def append(self, msg):
+
+class UserMessages(UserEventSourceMixin):
+    def __init__(self, username, messages=[]):
+        super(UserMessages, self).__init__(username)
+        self.messages = messages
+
+    def append_message(self, msg):
         logger.info('record msg for ' + self.username)
         has_receiver = self.fire(msg)
         if not has_receiver:
-            self.msgs.append(msg)
+            self.messages.append(msg)
 
-    def get_msgs_clear(self):
-        ret = self.msgs
-        self.msgs = []
+    def pop_messages(self):
+        ret = self.messages
+        self.messages = []
         return ret
 
-    def get_msgs(self):
-        return self.msgs
+    def get_messages(self):
+        return self.messages
 
 
 # in-memory user related msgs container
-class UserMsgManager(object):
+class UserMessageManager(object):
     def __init__(self):
-        self.all_user_msgs = {}
+        # username -> messages
+        self.all_user_msessages = {}
 
-    def load(self, file):
+    def load(self, store_file_path):
         try:
-            store = open(file, 'r')
+            store = open(store_file_path, 'r')
             data_dict = json.load(store, encoding="utf-8")
-            for k, v in data_dict.items():  # k username v msgs
-                self.all_user_msgs[k] = UserMsgs(k, v)
+            for username, msgs in data_dict.items():
+                self.all_user_msessages[username] = UserMessages(username, msgs)
             store.close()
         except Exception, e:
             logger.error(e)
 
-    def dump(self, file):
+    def dump(self, store_file_path):
         try:
-            tmp = file + '.tmp'
-            tmpFile = open(tmp, 'w')
+            tmp_path = store_file_path + '.tmp'
+            tmp_file = open(tmp_path, 'w')
             data_dict = {}
-            for k, v in self.all_user_msgs.items():
+            for k, v in self.all_user_msessages.items():
                 data_dict[k] = v.msgs
-            json.dump(data_dict, tmpFile)
-            tmpFile.close()
-            if os.path.exists(file):
-                os.remove(file)
-            os.rename(tmp, file)
+            json.dump(data_dict, tmp_file)
+            tmp_file.close()
+            if os.path.exists(store_file_path):
+                os.remove(store_file_path)
+            os.rename(tmp_path, store_file_path)
         except Exception, e:
             logger.error(e)
 
-    def store_users_msg(self, users, msg):
+    def store_users_message(self, users, msg):
         if users == 'all':
-            for user in self.all_user_msgs.keys():
-                self.store_msg_for(user, msg)
+            for user in self.all_user_msessages.keys():
+                self.store_user_message_for(user, msg)
         else:
             for user in users:
-                self.store_msg_for(user, msg)
+                self.store_user_message_for(user, msg)
 
-    def get_msgs_object_for(self, user):
-        msgs = self.all_user_msgs.get(user, [])
-        if not msgs:
-            msgs = UserMsgs(user)
-            self.all_user_msgs[user] = msgs
-        return msgs
+    def get_user_messages_object_for(self, user):
+        user_msgs_obj = self.all_user_msessages.get(user, [])
+        if not user_msgs_obj:
+            user_msgs_obj = UserMessages(user)
+            self.all_user_msessages[user] = user_msgs_obj
+        return user_msgs_obj
 
-    def get_msgs_for(self, user):
-        msgs = self.get_msgs_object_for(user)
-        return msgs.get_msgs()
+    def get_user_messages_object_messages_for(self, user):
+        user_msgs_obj = self.get_user_messages_object_for(user)
+        return user_msgs_obj.get_messages()
 
-    def get_msgs_clear_for(self, user):
-        msgs = self.get_msgs_object_for(user)
-        return msgs.get_msgs_clear()
+    def pop_user_messages_object_messages_for(self, user):
+        user_msgs_obj = self.get_user_messages_object_for(user)
+        return user_msgs_obj.pop_messages()
 
-    def get_msgs_future_for(self, user):
-        msgs = self.get_msgs_object_for(user)
-        future = msgs.register()
+    def get_user_messages_object_future_for(self, user):
+        user_msgs_obj = self.get_user_messages_object_for(user)
+        future = user_msgs_obj.register()
         return future
 
-    def store_msg_for(self, user, msg):
-        msgs = self.all_user_msgs.get(user, [])
-        if not msgs:
-            msgs = UserMsgs(user)
-            self.all_user_msgs[user] = msgs
-        msgs.append(msg)
+    def store_user_message_for(self, user, msg):
+        user_msgs_obj = self.get_user_messages_object_for(user)
+        self.all_user_msessages[user] = user_msgs_obj
+        user_msgs_obj.append_message(msg)

@@ -16,9 +16,9 @@ import tornado.ioloop
 import tornado.web
 import tornado.gen
 
-from events.user_msgs import UserMsgManager
+from events.user_msgs import UserMessageManager
 
-user_msg_manager = UserMsgManager()
+user_msg_manager = UserMessageManager()
 
 from handlers.LongPollingHandler import *
 
@@ -52,9 +52,9 @@ def init_users_jobs():
 
 def main():
     url_matches = [
-        (r'/long_poll_v3', LongPollingHandlerV3),  # product
-        (r'/msgs', WatchAndKeepMsgHandler),  # debug
-        (r'/push', PushHandler),  # admin push
+        (r'/pop_msgs', LongPollingHandlerV3),  # product
+        (r'/get_msgs', WatchAndKeepMsgHandler),  # debug
+        (r'/push_msg', PushHandler),  # admin push
     ]
     app = tornado.web.Application(url_matches)
     app.listen(8888)
