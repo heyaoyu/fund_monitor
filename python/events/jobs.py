@@ -100,7 +100,7 @@ class FundMonitorJob(object):
                 users.append(user_msg_filter.user)
                 json_object['max'] = user_msg_filter.max
                 json_object['min'] = user_msg_filter.min
-        user_msg_manager.store_users_msg(users, json.dumps(json_object))
+        user_msg_manager.store_users_message(users, json.dumps(json_object))
 
 
 class AdminMessageSource(object):
@@ -108,7 +108,7 @@ class AdminMessageSource(object):
         super(AdminMessageSource, self).__init__()
 
     def send_msg(self, msg):
-        user_msg_manager.store_users_msg('all', msg)
+        user_msg_manager.store_users_message('all', msg)
 
 
 admin_source = AdminMessageSource()

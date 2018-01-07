@@ -80,8 +80,8 @@ class UserMessageManager(object):
             tmp_path = store_file_path + '.tmp'
             tmp_file = open(tmp_path, 'w')
             data_dict = {}
-            for k, v in self.all_user_msessages.items():
-                data_dict[k] = v.msgs
+            for username, user_msgs_obj in self.all_user_msessages.items():
+                data_dict[username] = user_msgs_obj.get_messages()
             json.dump(data_dict, tmp_file)
             tmp_file.close()
             if os.path.exists(store_file_path):
