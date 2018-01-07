@@ -53,7 +53,6 @@ def load_user_jobs():
 
 def main():
     url_matches = [
-        (r'/', MainHandler),
         (r'/long_poll_v3', LongPollingHandlerV3),
         (r'/msgs', WatchAndKeepMsgHandler),
         (r'/push', PushHandler),
