@@ -2,8 +2,8 @@
 __author__ = 'heyaoyu'
 
 import os
-import logging.config
 import time
+import logging.config
 
 log_path = os.path.join(os.path.dirname(__file__), 'logging.conf')
 logging.config.fileConfig(log_path)
@@ -20,13 +20,12 @@ from events.user_msgs import UserMsgManager
 
 user_msg_manager = UserMsgManager()
 
-from handlers.MainHandler import *
 from handlers.LongPollingHandler import *
 
-from events.jobs import FundMonitorJob, UserDataHandler
+from events.jobs import FundMonitorJob, UserMessageFilter
 
 
-def init_user_msg_job():
+def init_users_msg_job():
     user_msg_store_path = os.path.join(os.path.dirname(__file__), 'user_msg.store')
     if os.path.exists(user_msg_store_path):
         user_msg_manager.load(user_msg_store_path)
@@ -34,33 +33,33 @@ def init_user_msg_job():
                                     callback_time=5000).start()  # 5s
 
 
-def load_user_jobs():
+def init_users_jobs():
     db_path = os.path.join(os.path.dirname(__file__), 'userjob_sample.db')
-    file = open(db_path, 'r')
+    job_file = open(db_path, 'r')
     fund_jobs = {}
-    for line in file.readlines():
+    for line in job_file.readlines():
         user, fund_code, min, max = line.split('_')
         if fund_code in fund_jobs.keys():
-            fund_jobs[fund_code].append(UserDataHandler(user, min, max))
+            fund_jobs[fund_code].append(UserMessageFilter(user, min, max))
         else:
-            fund_jobs[fund_code] = [UserDataHandler(user, min, max)]
-    for fund_code, userdatahandlers in fund_jobs.items():
+            fund_jobs[fund_code] = [UserMessageFilter(user, min, max)]
+    for fund_code, user_msg_filters in fund_jobs.items():
         job = FundMonitorJob(fund_code)
-        job.attach(userdatahandlers)
+        job.attach_user_msg_filters(user_msg_filters)
         tornado.ioloop.PeriodicCallback(callback=job, callback_time=60000).start()  # 60s
-    file.close()
+    job_file.close()
 
 
 def main():
     url_matches = [
-        (r'/long_poll_v3', LongPollingHandlerV3),
-        (r'/msgs', WatchAndKeepMsgHandler),
-        (r'/push', PushHandler),
+        (r'/long_poll_v3', LongPollingHandlerV3),  # product
+        (r'/msgs', WatchAndKeepMsgHandler),  # debug
+        (r'/push', PushHandler),  # admin push
     ]
     app = tornado.web.Application(url_matches)
     app.listen(8888)
-    init_user_msg_job()
-    load_user_jobs()
+    init_users_msg_job()
+    init_users_jobs()
     tornado.ioloop.IOLoop.current().start()
 
 

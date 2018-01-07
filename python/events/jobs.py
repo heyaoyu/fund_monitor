@@ -45,7 +45,7 @@ def millsecondsOfNow():
     return (int(round(time.time() * 1000)))
 
 
-class UserDataHandler(object):
+class UserMessageFilter(object):
     def __init__(self, user, min, max, interval=500):
         self.user = user
         self.min = float(min)
@@ -77,8 +77,8 @@ class FundMonitorJob(object):
         super(FundMonitorJob, self).__init__()
         self.fund_code = fund_code
 
-    def attach(self, user_data_handlers):
-        self.user_data_handlers = user_data_handlers
+    def attach_user_msg_filters(self, user_msg_filters):
+        self.user_msg_filters = user_msg_filters
 
     @staticmethod
     def to_json(s):
@@ -95,11 +95,11 @@ class FundMonitorJob(object):
         if not json_object:
             return
         users = []
-        for user_data_handler in self.user_data_handlers:
-            if user_data_handler.shouldTake(float(json_object['gsz'])):
-                users.append(user_data_handler.user)
-                json_object['max'] = user_data_handler.max
-                json_object['min'] = user_data_handler.min
+        for user_msg_filter in self.user_msg_filters:
+            if user_msg_filter.shouldTake(float(json_object['gsz'])):
+                users.append(user_msg_filter.user)
+                json_object['max'] = user_msg_filter.max
+                json_object['min'] = user_msg_filter.min
         user_msg_manager.store_users_msg(users, json.dumps(json_object))
 
 
