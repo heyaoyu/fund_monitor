@@ -16,13 +16,13 @@ import tornado.ioloop
 import tornado.web
 import tornado.gen
 
-from events.user_msgs import UserMessageManager
+from user_msgs import UserMessageManager
 
 user_msg_manager = UserMessageManager()
 
-from handlers.LongPollingHandler import *
+from handlers import *
 
-from events.jobs import FundMonitorJob, UserMessageFilter
+from jobs import FundMonitorJob, UserMessageFilter
 
 
 def init_users_msg_job():

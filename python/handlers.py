@@ -12,7 +12,7 @@ import tornado.gen
 import tornado.concurrent
 
 from main import user_msg_manager
-from events.jobs import admin_source
+from jobs import admin_source
 
 
 class LongPollingHandlerV3(tornado.web.RequestHandler):
