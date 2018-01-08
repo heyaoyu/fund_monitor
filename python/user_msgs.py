@@ -20,7 +20,6 @@ class EventSourceMixin(object):
 
     def fire(self, data):
         logger.debug('waiters#' + str(len(self.waiters)))
-
         has_receiver = False
         for future in self.waiters:
             has_receiver = True
@@ -65,17 +64,6 @@ class UserMessageManager(object):
         # username -> messages
         self.all_user_msessages = {}
 
-    # called by init
-    def load(self, store_file_path):
-        try:
-            store = open(store_file_path, 'r')
-            data_dict = json.load(store, encoding="utf-8")
-            for username, msgs in data_dict.items():
-                self.all_user_msessages[username] = UserMessages(username, msgs)
-            store.close()
-        except Exception, e:
-            logger.error(e)
-
     # called repeatedly to keep message
     def dump(self, store_file_path):
         try:
@@ -92,28 +80,35 @@ class UserMessageManager(object):
         except Exception, e:
             logger.error(e)
 
-    # for msg to multiple users, job.py
-    def store_users_message(self, users, msg):
-        if users == 'all':
-            for user in self.all_user_msessages.keys():
-                self.store_user_message_for(user, msg)
-        else:
-            for user in users:
-                self.store_user_message_for(user, msg)
+    # called by init
+    def load(self, store_file_path):
+        try:
+            store = open(store_file_path, 'r')
+            data_dict = json.load(store, encoding="utf-8")
+            for username, msgs in data_dict.items():
+                self.all_user_msessages[username] = UserMessages(username, msgs)
+            store.close()
+        except Exception, e:
+            logger.error(e)
 
-    # called only by self.store_users_message so far
-    def store_user_message_for(self, user, msg):
-        user_msgs_obj = self.get_user_messages_object_for(user)
-        self.all_user_msessages[user] = user_msgs_obj
-        user_msgs_obj.append_message(msg)
+    # send msg to multiple users
+    def store_all_users_message(self, msg, users=[]):
+        if not users:
+            users = self.all_user_msessages.keys()
+        for user in users:
+            self.store_user_message_for(user, msg)
 
-    # called by handlers
     def get_user_messages_object_for(self, user):
         user_msgs_obj = self.all_user_msessages.get(user, [])
         if not user_msgs_obj:
             user_msgs_obj = UserMessages(user)
             self.all_user_msessages[user] = user_msgs_obj
         return user_msgs_obj
+
+    # send msg to single certain user
+    def store_user_message_for(self, user, msg):
+        user_msgs_obj = self.get_user_messages_object_for(user)
+        user_msgs_obj.append_message(msg)
 
     # called by handlers
     def get_user_messages_object_messages_for(self, user):
