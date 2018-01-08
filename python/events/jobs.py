@@ -94,13 +94,11 @@ class FundMonitorJob(object):
         logger.info(json_str)
         if not json_object:
             return
-        users = []
         for user_msg_filter in self.user_msg_filters:
             if user_msg_filter.shouldTake(float(json_object['gsz'])):
-                users.append(user_msg_filter.user)
                 json_object['max'] = user_msg_filter.max
                 json_object['min'] = user_msg_filter.min
-        user_msg_manager.store_users_message(users, json.dumps(json_object))
+                user_msg_manager.store_user_message_for(user_msg_filter.user, json.dumps(json_object))
 
 
 class AdminMessageSource(object):
