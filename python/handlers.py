@@ -50,3 +50,4 @@ class PushHandler(tornado.web.RequestHandler):
     def get(self):
         val = self.get_argument("value")
         admin_source.send_msg(val)
+        self.finish()
