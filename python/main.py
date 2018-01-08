@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 __author__ = 'heyaoyu'
 
+# log
 import os
 import time
 import logging.config
@@ -15,11 +16,11 @@ logging.getLogger("tornado.general").disabled = False
 import tornado.ioloop
 import tornado.web
 import tornado.gen
-
+# user_msg
 from user_msgs import UserMessageManager
 
 user_msg_manager = UserMessageManager()
-
+# handlers
 from handlers import *
 
 from jobs import FundMonitorJob, UserMessageFilter
@@ -43,24 +44,27 @@ def init_users_jobs():
             fund_jobs[fund_code].append(UserMessageFilter(user, min, max))
         else:
             fund_jobs[fund_code] = [UserMessageFilter(user, min, max)]
+    job_file.close()
     for fund_code, user_msg_filters in fund_jobs.items():
         job = FundMonitorJob(fund_code)
         job.attach_user_msg_filters(user_msg_filters)
         tornado.ioloop.PeriodicCallback(callback=job, callback_time=60000).start()  # 60s
-    job_file.close()
 
 
 def main():
-    url_matches = [
-        (r'/pop_msgs', LongPollingHandlerV3),  # product
-        (r'/get_msgs', WatchAndKeepMsgHandler),  # debug
-        (r'/push_msg', PushHandler),  # admin push
-    ]
-    app = tornado.web.Application(url_matches)
-    app.listen(8888)
-    init_users_msg_job()
-    init_users_jobs()
-    tornado.ioloop.IOLoop.current().start()
+    try:
+        url_matches = [
+            (r'/pop_msgs', LongPollingHandlerV3),  # product
+            (r'/get_msgs', WatchAndKeepMsgHandler),  # debug
+            (r'/push_msg', PushHandler),  # admin push
+        ]
+        app = tornado.web.Application(url_matches)
+        app.listen(8888)
+        init_users_msg_job()
+        init_users_jobs()
+        tornado.ioloop.IOLoop.current().start()
+    except Exception, e:
+        logger.error(e)
 
 
 if __name__ == '__main__':
