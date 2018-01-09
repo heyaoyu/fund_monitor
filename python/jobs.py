@@ -97,9 +97,13 @@ class FundMonitorJob(object):
         for user_msg_filter in self.user_msg_filters:
             ret = user_msg_filter.shouldTake(float(json_object['gsz']))
             if ret:
+                json_object['gsz'] = float(json_object['gsz'])
                 json_object['type'] = ret
                 json_object['max'] = user_msg_filter.max
                 json_object['min'] = user_msg_filter.min
+                utc_ts = datetime.utcnow()
+                bj_ts = utc_ts + timedelta(hours=8)
+                json_object['bjtime'] = bj_ts.strftime("%Y-%m-%d %H:%M:%S")
                 user_msg_manager.store_user_message_for(user_msg_filter.user, json.dumps(json_object))
 
 
