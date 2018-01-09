@@ -25,11 +25,14 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
             self.write(str(msgs))
             self.finish()
             return
+        future = None
         try:
             future = user_msg_manager.get_user_messages_object_future_for(user)
             msg = yield tornado.gen.with_timeout(timedelta(seconds=10), future)
             self.write(str(msg))
         except tornado.gen.TimeoutError:
+            if future:
+                user_msg_manager.get_user_messages_object_for(user).clear(future)
             logger.error(
                 "TimeoutErrorExpected_" + str(len(user_msg_manager.get_user_messages_object_for(user).waiters)))
             self.write("TimeoutError")
