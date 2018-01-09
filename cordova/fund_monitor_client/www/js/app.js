@@ -64,7 +64,8 @@ function poll() {
     }
     $.ajax({
         type: "GET",
-        url: "http://127.0.0.1:8888/pop_msgs?user=ludi",
+        //url: "http://127.0.0.1:8888/pop_msgs?user=ludi",
+        url: "http://162.219.122.107:8888/pop_msgs?user=ludi",
         timeout: request_timeout,
         success: function (data, textStatus) {
             if (typeof(data) == "string") { // TimeoutError
