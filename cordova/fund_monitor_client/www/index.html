@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Fund_Monitor_Client</title>
+    <title>Fund_Monitor</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Security-Policy"
@@ -12,36 +12,26 @@
 <body>
 
 <div class="container-fluid">
-    <div id="output" class="table-responsive">
-        <table class="table table-hover table-bordered">
-            <!--<thead>-->
-            <!--<th>#</th>-->
-            <!--<th>单位净值</th>-->
-            <!--<th>估算值</th>-->
-            <!--<th>估算值增量</th>-->
-            <!--<th>时间</th>-->
-            <!--</thead>-->
-            <thead class="table-primary">
-            <tr>
-                <th>状态</th>
-                <th>msg</th>
-                <th>ts</th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    <div id="top" class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1>Fund_Monitor</h1>
+
+            <p class="lead">Monitor Fund...</p>
+        </div>
+        <div class="alert alert-primary" role="alert">
+            这是一条普通消息。
+            <a href="#" class="alert-link">每日关注更新</a>
+        </div>
+        <div class="alert alert-success" role="alert">
+            这是一条利好消息，估算值超过上限了！
+            <a href="#" class="alert-link">是不是要飞一波了？</a>
+        </div>
+        <div class="alert alert-danger" role="alert">
+            这是一条警告消息，估算值低于下限了！
+            <a href="#" class="alert-link">是不是又能好好上班了？</a>
+        </div>
     </div>
-    <div id="error" class="table-responsive">
-        <table class="table table-hover table-bordered">
-            <thead class="table-danger">
-            <tr>
-                <th>状态</th>
-                <th>msg</th>
-                <th>ts</th>
-            </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    <div id="msg_panel" class="container-fluid">
     </div>
 </div>
 <!--<script type="text/javascript" src="cordova.js"></script>-->

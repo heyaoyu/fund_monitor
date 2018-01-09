@@ -60,11 +60,11 @@ class UserMessageFilter(object):
         _15_00 = bj_ts.replace(hour=15, minute=0, second=0, microsecond=0)
         delta = _15_00 - bj_ts
         if delta.total_seconds() > 0 and delta.total_seconds() <= 60:
-            return True
+            return 1
         if self.last_sent is None or (bj_ts - self.last_sent).total_seconds() > self.interval:
             if data <= self.min or data >= self.max:
                 self.last_sent = bj_ts
-                return True
+                return 2
         return False
 
 
@@ -95,7 +95,9 @@ class FundMonitorJob(object):
         if not json_object:
             return
         for user_msg_filter in self.user_msg_filters:
-            if user_msg_filter.shouldTake(float(json_object['gsz'])):
+            ret = user_msg_filter.shouldTake(float(json_object['gsz']))
+            if ret:
+                json_object['type'] = ret
                 json_object['max'] = user_msg_filter.max
                 json_object['min'] = user_msg_filter.min
                 user_msg_manager.store_user_message_for(user_msg_filter.user, json.dumps(json_object))

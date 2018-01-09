@@ -1,9 +1,35 @@
-var output = $("#output table tbody");
-var error = $("#error table tbody");
+var output = $("#msg_panel");
 
-var request_timeout = 60000;
-var timeout = 0;
+var request_timeout = 60000; // 60s
+var interval = 0;
 var timer = null;
+
+function printPrimaryMsg(msg) {
+    var element = $('<div/>', {
+        class: 'alert alert-primary',
+        role: 'alert',
+        text: msg
+    });
+    output.prepend(element)
+}
+
+function printSuccessMsg(msg) {
+    var element = $('<div/>', {
+        class: 'alert alert-success',
+        role: 'alert',
+        text: msg
+    });
+    output.prepend(element)
+}
+
+function printDangerMsg(msg) {
+    var element = $('<div/>', {
+        class: 'alert alert-danger',
+        role: 'alert',
+        text: msg
+    });
+    output.prepend(element)
+}
 
 function poll() {
     if (timer != null) {
@@ -11,17 +37,17 @@ function poll() {
     }
     $.ajax({
         type: "GET",
-        url: "http://127.0.0.1:8888/long_poll_v3",
+        url: "http://127.0.0.1:8888/pop_msgs?name=ludi",
         timeout: request_timeout,
         success: function (data, textStatus) {
-            output.append("<tr><td>" + textStatus + "</td><td>" + data + "</td><td>" + new Date() + "</td></tr>");
-            timeout = 0;
-            timer = setTimeout(poll, timeout);
+            printPrimaryMsg(typeof data + '*' + data);
+            interval = 0;
+            timer = setTimeout(poll, interval);
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            error.append("<tr><td>" + textStatus + "</td><td>" + errorThrown + "</td><td>" + new Date() + "</td></tr>");
-            timeout += 5000;
-            timer = setTimeout(poll, timeout);
+            printPrimaryMsg(textStatus + '' + errorThrown);
+            interval += 5000;
+            timer = setTimeout(poll, interval);
         }
     });
 }
