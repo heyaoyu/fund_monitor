@@ -40,12 +40,20 @@ function poll() {
         url: "http://127.0.0.1:8888/pop_msgs?user=ludi",
         timeout: request_timeout,
         success: function (data, textStatus) {
-            printPrimaryMsg(typeof data + '*' + data);
-            interval = 0;
-            timer = setTimeout(poll, interval);
+            if (typeof(data) == "string") { // TimeoutError
+                printPrimaryMsg(data);
+            } else if (typeof(data) == "object") { // msgs
+                var msgs = data.datas;
+                for (var i = 0; i < msgs.length; i++) {
+                    var msg = msgs[i];
+                    printPrimaryMsg(msg);
+                }
+                interval = 0;
+                timer = setTimeout(poll, interval);
+            }
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
-            printPrimaryMsg(textStatus + '' + errorThrown);
+            printPrimaryMsg(textStatus + '*' + errorThrown);
             interval += 5000;
             timer = setTimeout(poll, interval);
         }

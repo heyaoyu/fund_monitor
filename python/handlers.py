@@ -22,14 +22,16 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
         user = self.get_argument("user", "user")
         msgs = user_msg_manager.pop_user_messages_object_messages_for(user)
         if msgs:
-            self.write(str(msgs))
+            ret = {'datas': msgs}
+            self.write(ret)
             self.finish()
             return
         future = None
         try:
             future = user_msg_manager.get_user_messages_object_future_for(user)
             msg = yield tornado.gen.with_timeout(timedelta(seconds=10), future)
-            self.write(str(msg))
+            ret = {'datas': [msg]}
+            self.write(ret)
         except tornado.gen.TimeoutError:
             if future:
                 user_msg_manager.get_user_messages_object_for(user).clear(future)
