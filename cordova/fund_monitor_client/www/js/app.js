@@ -76,9 +76,9 @@ function poll() {
                     var msg = msgs[i];
                     processMsg(msg);
                 }
-                interval = 0;
-                timer = setTimeout(poll, interval);
             }
+            interval = 0;
+            timer = setTimeout(poll, interval);
         },
         error: function (XMLHttpRequest, textStatus, errorThrown) {
             //printPrimaryMsg(textStatus + '*' + errorThrown);
