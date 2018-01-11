@@ -34,7 +34,7 @@ def init_users_msg_job():
                                     callback_time=5000).start()  # 5s
 
 
-def init_users_jobs():
+def update_users_jobs():
     db_path = os.path.join(os.path.dirname(__file__), 'userjob_sample.db')
     job_file = open(db_path, 'r')
     fund_jobs = {}
@@ -48,7 +48,8 @@ def init_users_jobs():
     for fund_code, user_msg_filters in fund_jobs.items():
         job = FundMonitorJob(fund_code)
         job.attach_user_msg_filters(user_msg_filters)
-        tornado.ioloop.PeriodicCallback(callback=job, callback_time=60000).start()  # 60s
+        job()
+    tornado.ioloop.PeriodicCallback(callback=update_users_jobs, callback_time=60000).start()  # 60s
 
 
 def main():
@@ -61,7 +62,7 @@ def main():
         app = tornado.web.Application(url_matches)
         app.listen(8888)
         init_users_msg_job()
-        init_users_jobs()
+        update_users_jobs()
         tornado.ioloop.IOLoop.current().start()
     except Exception, e:
         logger.error(e)
