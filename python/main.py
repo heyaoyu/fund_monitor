@@ -49,7 +49,8 @@ def update_users_jobs():
         job = FundMonitorJob(fund_code)
         job.attach_user_msg_filters(user_msg_filters)
         job()
-    tornado.ioloop.PeriodicCallback(callback=update_users_jobs, callback_time=60000).start()  # 60s
+    current_ioloop = tornado.ioloop.IOLoop.current()
+    current_ioloop.add_timeout(current_ioloop.time() + 60, update_users_jobs)
 
 
 def main():
