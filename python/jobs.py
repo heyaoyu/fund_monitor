@@ -18,11 +18,11 @@ def is_A_market_opening():
     bj_ts = utc_ts + timedelta(hours=8)
     if bj_ts.weekday() + 1 in [6, 7]:
         return False
-    _9_30 = bj_ts.replace(hour=9, minute=30, second=0, microsecond=0)
+    _09_30 = bj_ts.replace(hour=9, minute=30, second=0, microsecond=0)
     _11_30 = bj_ts.replace(hour=11, minute=30, second=0, microsecond=0)
     _13_00 = bj_ts.replace(hour=13, minute=0, second=0, microsecond=0)
     _15_00 = bj_ts.replace(hour=15, minute=0, second=0, microsecond=0)
-    if (_9_30 <= bj_ts and bj_ts <= _11_30) or (_13_00 <= bj_ts and bj_ts <= _15_00):
+    if (_09_30 <= bj_ts and bj_ts <= _11_30) or (_13_00 <= bj_ts and bj_ts <= _15_00):
         return True
     else:
         return False
@@ -54,9 +54,21 @@ class UserMessageFilter(object):
         self.last_sent = None
 
     def shouldTake(self, data):
-        # at least 1 msg per day
+        # 4 msgs per-day
         utc_ts = datetime.utcnow()
         bj_ts = utc_ts + timedelta(hours=8)
+        _09_30 = bj_ts.replace(hour=9, minute=30, second=0, microsecond=0)
+        delta = bj_ts - _09_30
+        if delta.total_seconds() > 0 and delta.total_seconds() <= 60:
+            return 1
+        _11_30 = bj_ts.replace(hour=11, minute=30, second=0, microsecond=0)
+        delta = _11_30 - bj_ts
+        if delta.total_seconds() > 0 and delta.total_seconds() <= 60:
+            return 1
+        _13_00 = bj_ts.replace(hour=13, minute=0, second=0, microsecond=0)
+        delta = bj_ts - _13_00
+        if delta.total_seconds() > 0 and delta.total_seconds() <= 60:
+            return 1
         _15_00 = bj_ts.replace(hour=15, minute=0, second=0, microsecond=0)
         delta = _15_00 - bj_ts
         if delta.total_seconds() > 0 and delta.total_seconds() <= 60:
