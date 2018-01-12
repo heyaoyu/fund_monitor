@@ -35,22 +35,26 @@ def init_users_msg_job():
 
 
 def update_users_jobs():
-    db_path = os.path.join(os.path.dirname(__file__), 'userjob_sample.db')
-    job_file = open(db_path, 'r')
-    fund_jobs = {}
-    for line in job_file.readlines():
-        user, fund_code, min, max = line.split('_')
-        if fund_code in fund_jobs.keys():
-            fund_jobs[fund_code].append(UserMessageFilter(user, min, max))
-        else:
-            fund_jobs[fund_code] = [UserMessageFilter(user, min, max)]
-    job_file.close()
-    for fund_code, user_msg_filters in fund_jobs.items():
-        job = FundMonitorJob(fund_code)
-        job.attach_user_msg_filters(user_msg_filters)
-        job()
-    current_ioloop = tornado.ioloop.IOLoop.current()
-    current_ioloop.add_timeout(current_ioloop.time() + 60, update_users_jobs)
+    try:
+        db_path = os.path.join(os.path.dirname(__file__), 'userjob_sample.db')
+        job_file = open(db_path, 'r')
+        fund_jobs = {}
+        for line in job_file.readlines():
+            user, fund_code, min, max = line.split('_')
+            if fund_code in fund_jobs.keys():
+                fund_jobs[fund_code].append(UserMessageFilter(user, min, max))
+            else:
+                fund_jobs[fund_code] = [UserMessageFilter(user, min, max)]
+        job_file.close()
+        for fund_code, user_msg_filters in fund_jobs.items():
+            job = FundMonitorJob(fund_code)
+            job.attach_user_msg_filters(user_msg_filters)
+            job()
+    except Exception, e:
+        logger.error(e)
+    finally:
+        current_ioloop = tornado.ioloop.IOLoop.current()
+        current_ioloop.add_timeout(current_ioloop.time() + 60, update_users_jobs)
 
 
 def main():
