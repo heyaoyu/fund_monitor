@@ -63,14 +63,20 @@ def update_users_jobs():
         current_ioloop.add_timeout(current_ioloop.time() + 60, update_users_jobs)
 
 
+settings = {
+    "cookie_secret": "f1rStbArrEL0Fg01d",
+}
+
+
 def main():
     try:
         url_matches = [
+            (r'/login', LoginHandler),  # login
             (r'/pop_msgs', LongPollingHandlerV3),  # product
             (r'/get_msgs', WatchAndKeepMsgHandler),  # debug
             (r'/push_msg', PushHandler),  # admin push
         ]
-        app = tornado.web.Application(url_matches)
+        app = tornado.web.Application(url_matches, **settings)
         app.listen(8888)
         init_users_msg_job()
         update_users_jobs()

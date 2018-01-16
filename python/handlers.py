@@ -15,14 +15,34 @@ from main import user_msg_manager
 from jobs import admin_source
 
 
-class LongPollingHandlerV3(tornado.web.RequestHandler):
+class BaseHandler(tornado.web.RequestHandler):
+    def get_current_user(self):
+        return self.get_secure_cookie("user")
+
+
+class LoginHandler(BaseHandler):
+    def get(self):
+        self.set_header("Access-Control-Allow-Credentials", "true")
+        self.set_header("Access-Control-Allow-Origin", "null")
+        user = self.get_argument("user")
+        self.set_secure_cookie("user", user)
+        self.write({'status': 'ok', 'user': user})
+
+
+class LongPollingHandlerV3(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
-        self.set_header("Access-Control-Allow-Origin", "*")
-        user = self.get_argument("user", "user")
+        self.set_header("Access-Control-Allow-Credentials", "true")
+        self.set_header("Access-Control-Allow-Origin", "null")
+        if self.current_user is None:
+            ret = {'status': 'error', 'datas': 'login first'}
+            self.write(ret)
+            self.finish()
+            return
+        user = self.current_user
         msgs = user_msg_manager.pop_user_messages_object_messages_for(user)
         if msgs:
-            ret = {'datas': msgs}
+            ret = {'status': 'ok', 'datas': msgs}
             self.write(ret)
             self.finish()
             return
@@ -30,7 +50,7 @@ class LongPollingHandlerV3(tornado.web.RequestHandler):
         try:
             future = user_msg_manager.get_user_messages_object_future_for(user)
             msg = yield tornado.gen.with_timeout(timedelta(seconds=10), future)
-            ret = {'datas': [msg]}
+            ret = {'status': 'ok', 'datas': [msg]}
             self.write(ret)
         except tornado.gen.TimeoutError:
             if future:

@@ -62,19 +62,28 @@ function poll() {
     if (timer != null) {
         clearTimeout(timer);
     }
+    var user = $("#current_user").val()
     $.ajax({
         type: "GET",
-        //url: "http://127.0.0.1:8888/pop_msgs?user=ludi",
-        url: "http://162.219.122.107:8888/pop_msgs?user=ludi",
+        url: "http://127.0.0.1:8888/pop_msgs?user=" + user,
+        //url: "http://162.219.122.107:8888/pop_msgs?user=ludi",
+        xhrFields: {
+            withCredentials: true
+        },
         timeout: request_timeout,
         success: function (data, textStatus) {
             if (typeof(data) == "string") { // TimeoutError
                 //printPrimaryMsg(data);
             } else if (typeof(data) == "object") { // msgs
-                var msgs = data.datas;
-                for (var i = 0; i < msgs.length; i++) {
-                    var msg = msgs[i];
-                    processMsg(msg);
+                if (data.status == "ok") {
+                    var msgs = data.datas;
+                    for (var i = 0; i < msgs.length; i++) {
+                        var msg = msgs[i];
+                        processMsg(msg);
+                    }
+                } else {// not login
+                    printDangerMsg(data.datas);
+                    return;
                 }
             }
             interval = 0;
@@ -88,6 +97,29 @@ function poll() {
     });
 }
 
+function login() {
+    var user = $("#login-user").val();
+    $.ajax({
+        type: "GET",
+        url: "http://127.0.0.1:8888/login?user=" + user,
+        xhrFields: {
+            withCredentials: true
+        },
+        success: function (data) {
+            $("#current_user").val(data.user);
+            $("#login-form").hide();
+            poll();
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            printDangerMsg("和总部联系不上啊")
+        }
+    });
+}
+
+function init() {
+    $("#login-btn").click(login);
+}
+
 $(document).ready(function () {
-    poll();
+    init();
 });
