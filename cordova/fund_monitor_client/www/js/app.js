@@ -62,7 +62,7 @@ function poll() {
     if (timer != null) {
         clearTimeout(timer);
     }
-    var user = $("#current_user").val()
+    var user = $("#current_user").html();
     $.ajax({
         type: "GET",
         url: "http://127.0.0.1:8888/pop_msgs?user=" + user,
@@ -106,7 +106,7 @@ function login() {
             withCredentials: true
         },
         success: function (data) {
-            $("#current_user").val(data.user);
+            $("#current_user").html(data.user);
             $("#login-form").hide();
             poll();
         },
