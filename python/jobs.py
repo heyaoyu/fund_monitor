@@ -53,6 +53,11 @@ class UserMessageFilter(object):
         self.interval = float(interval)
         self.last_sent = None
 
+    def update(self, min, max, interval=500):
+        self.min = float(min)
+        self.max = float(max)
+        self.interval = float(interval)
+
     def shouldTake(self, data):
         # 4 msgs per-day
         utc_ts = datetime.utcnow()
