@@ -65,7 +65,7 @@ function poll() {
     var user = $("#current_user").html();
     $.ajax({
         type: "GET",
-        url: "http://127.0.0.1:8888/pop_msgs?user=" + user,
+        url: "http://162.219.122.107:8888/pop_msgs?user=" + user,
         //url: "http://162.219.122.107:8888/pop_msgs?user=ludi",
         xhrFields: {
             withCredentials: true
@@ -101,7 +101,7 @@ function login() {
     var user = $("#login-user").val();
     $.ajax({
         type: "GET",
-        url: "http://127.0.0.1:8888/login?user=" + user,
+        url: "http://162.219.122.107:8888/login?user=" + user,
         xhrFields: {
             withCredentials: true
         },
