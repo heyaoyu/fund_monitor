@@ -7,27 +7,31 @@ var timer = null;
 
 // msg: gztime, name, fundcode, gsz, jzrq, dwjz, gszzl, bjtime, type
 function processMsg(jsonstr) {
-    json = $.parseJSON(jsonstr);
-    ret =
-        "北京时间：" + json['bjtime'] +
-        ",基金代码：" + json['fundcode'] +
-        ",基金名称：" + json['name'] +
-        ",估值时间：" + json['gztime'] +
-        ",下限：" + json['min'] +
-        ",估算值：" + json['gsz'] +
-        ",上限：" + json['max'] +
-        ",净值日期：" + json['jzrq'] +
-        ",单位净值：" + json['dwjz'] +
-        ",估算增长率：" + json['gszzl'];
-    if (json['type'] == 1) {
-        ret = "日常更新：" + ret;
-    }
-    if (json['gsz'] <= json['min']) {
-        printDangerMsg(ret);
-    } else if (json['min'] < json['gsz'] && json['gsz'] < json['max']) {
-        printPrimaryMsg(ret);
-    } else if (json['max'] <= json['gsz']) {
-        printSuccessMsg(ret);
+    try {
+        json = $.parseJSON(jsonstr);
+        ret =
+            "北京时间：" + json['bjtime'] +
+            ",基金代码：" + json['fundcode'] +
+            ",基金名称：" + json['name'] +
+            ",估值时间：" + json['gztime'] +
+            ",下限：" + json['min'] +
+            ",估算值：" + json['gsz'] +
+            ",上限：" + json['max'] +
+            ",净值日期：" + json['jzrq'] +
+            ",单位净值：" + json['dwjz'] +
+            ",估算增长率：" + json['gszzl'];
+        if (json['type'] == 1) {
+            ret = "日常更新：" + ret;
+        }
+        if (json['gsz'] <= json['min']) {
+            printDangerMsg(ret);
+        } else if (json['min'] < json['gsz'] && json['gsz'] < json['max']) {
+            printPrimaryMsg(ret);
+        } else if (json['max'] <= json['gsz']) {
+            printSuccessMsg(ret);
+        }
+    } catch (err) {
+        printPrimaryMsg(jsonstr);
     }
 }
 
@@ -66,7 +70,7 @@ function poll() {
     $.ajax({
         type: "GET",
         url: "http://162.219.122.107:8888/pop_msgs?user=" + user,
-        //url: "http://162.219.122.107:8888/pop_msgs?user=ludi",
+        //url: "http://127.0.0.1:8888/pop_msgs?user=" + user,
         xhrFields: {
             withCredentials: true
         },
@@ -102,6 +106,7 @@ function login() {
     $.ajax({
         type: "GET",
         url: "http://162.219.122.107:8888/login?user=" + user,
+        //url: "http://127.0.0.1:8888/login?user=" + user,
         xhrFields: {
             withCredentials: true
         },
