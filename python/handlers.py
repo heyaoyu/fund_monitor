@@ -76,3 +76,19 @@ class PushHandler(tornado.web.RequestHandler):
         val = self.get_argument("value")
         admin_source.send_msg(val)
         self.finish()
+
+
+import tcelery
+from celery_app import mysql_celery_app
+
+tcelery.setup_nonblocking_producer(celery_app=mysql_celery_app)
+
+import celery_mysql_task
+
+
+class CeleryTestHandler(tornado.web.RequestHandler):
+    @tornado.gen.coroutine
+    def get(self):
+        response = yield tornado.gen.Task(celery_mysql_task.num_of_records.apply_async, args=["user"])
+        self.write({'results': response.result})
+        self.finish()

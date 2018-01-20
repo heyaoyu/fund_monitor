@@ -75,6 +75,7 @@ def main():
             (r'/pop_msgs', LongPollingHandlerV3),  # product
             (r'/get_msgs', WatchAndKeepMsgHandler),  # debug
             (r'/push_msg', PushHandler),  # admin push
+            (r'/celery_test', CeleryTestHandler),  # num of records of table 'user'
         ]
         app = tornado.web.Application(url_matches, **settings)
         app.listen(8888)
