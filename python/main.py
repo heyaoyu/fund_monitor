@@ -34,15 +34,21 @@ def init_users_msg_job():
                                     callback_time=5000).start()  # 5s
 
 
+import tcelery
+from celery_app import mysql_celery_app
+
+tcelery.setup_nonblocking_producer(celery_app=mysql_celery_app)
+
+import celery_mysql_task
+
 fund_jobs = {}
 
 
 def update_users_jobs():
     try:
-        db_path = os.path.join(os.path.dirname(__file__), 'userjob_sample.db')
-        job_file = open(db_path, 'r')
-        for line in job_file.readlines():
-            user, fund_code, min, max = line.split('_')
+        configs = celery_mysql_task.get_all_user_fund_config()
+        for config in configs:
+            id, uid, user, fund_code, min, max, interval = config
             if fund_code in fund_jobs.keys():
                 user_msg_filters_dict = fund_jobs.get(fund_code, {})
                 if user in user_msg_filters_dict.keys():
@@ -51,7 +57,6 @@ def update_users_jobs():
                     user_msg_filters_dict[user] = UserMessageFilter(user, min, max)
             else:
                 fund_jobs[fund_code] = {user: UserMessageFilter(user, min, max)}
-        job_file.close()
         for fund_code, user_msg_filters_dict in fund_jobs.items():
             job = FundMonitorJob(fund_code)
             job.attach_user_msg_filters(user_msg_filters_dict.values())

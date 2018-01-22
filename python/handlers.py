@@ -81,11 +81,6 @@ class PushHandler(tornado.web.RequestHandler):
         self.finish()
 
 
-import tcelery
-from celery_app import mysql_celery_app
-
-tcelery.setup_nonblocking_producer(celery_app=mysql_celery_app)
-
 import celery_mysql_task
 
 
