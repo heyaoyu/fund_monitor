@@ -76,18 +76,20 @@ function poll() {
         },
         timeout: request_timeout,
         success: function (data, textStatus) {
-            if (typeof(data) == "string") { // TimeoutError
-                //printPrimaryMsg(data);
-            } else if (typeof(data) == "object") { // msgs
+            if (typeof(data) == "object") {
                 if (data.status == "ok") {
                     var msgs = data.datas;
                     for (var i = 0; i < msgs.length; i++) {
                         var msg = msgs[i];
                         processMsg(msg);
                     }
-                } else {// not login
-                    printDangerMsg(data.datas);
-                    return;
+                } else {
+                    if (data.code == 1) { // not login
+                        printDangerMsg(data.datas);
+                        return;
+                    } else if (data.code == 2) {// timeout
+                        // ignore
+                    }
                 }
             }
             interval = 0;

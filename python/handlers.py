@@ -29,13 +29,15 @@ class LoginHandler(BaseHandler):
         self.write({'status': 'ok', 'user': user})
 
 
+# ErrorCode: 1 - not login, 2 - TimeoutError
+
 class LongPollingHandlerV3(BaseHandler):
     @tornado.gen.coroutine
     def get(self):
         self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Origin", "null")
         if self.current_user is None:
-            ret = {'status': 'error', 'datas': 'login first'}
+            ret = {'status': 'error', 'datas': 'LoginFirst', 'code': 1}
             self.write(ret)
             self.finish()
             return
@@ -57,7 +59,8 @@ class LongPollingHandlerV3(BaseHandler):
                 user_msg_manager.get_user_messages_object_for(user).clear(future)
             logger.error(
                 "TimeoutErrorExpected_" + str(len(user_msg_manager.get_user_messages_object_for(user).waiters)))
-            self.write("TimeoutError")
+            ret = {'status': 'error', 'datas': 'TimeoutError', 'code': 2}
+            self.write(ret)
         self.finish()
 
 
