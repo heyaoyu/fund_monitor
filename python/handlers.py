@@ -14,6 +14,8 @@ import tornado.concurrent
 from main import user_msg_manager
 from jobs import admin_source
 
+import celery_mysql_task
+
 
 class BaseHandler(tornado.web.RequestHandler):
     def get_current_user(self):
@@ -21,12 +23,23 @@ class BaseHandler(tornado.web.RequestHandler):
 
 
 class LoginHandler(BaseHandler):
+    @tornado.gen.coroutine
     def get(self):
         self.set_header("Access-Control-Allow-Credentials", "true")
         self.set_header("Access-Control-Allow-Origin", "null")
         user = self.get_argument("user")
-        self.set_secure_cookie("user", user)
-        self.write({'status': 'ok', 'user': user})
+        try:
+            ret = yield tornado.gen.Task(celery_mysql_task.login.apply_async, args=[user])
+            result = ret.result
+            if result:
+                self.set_secure_cookie("user", user)
+                self.set_secure_cookie("userid", str(result[0]))
+                self.write({'status': 'ok', 'user': user})
+            else:
+                self.write({'status': 'error', 'user': 'no such user.'})
+        except Exception, e:
+            logger.error(e)
+            self.write({'status': 'error', 'user': 'please relogin.'})
 
 
 # ErrorCode: 1 - not login, 2 - TimeoutError
@@ -79,9 +92,6 @@ class PushHandler(tornado.web.RequestHandler):
         val = self.get_argument("value")
         admin_source.send_msg(val)
         self.finish()
-
-
-import celery_mysql_task
 
 
 class CeleryTestHandler(tornado.web.RequestHandler):

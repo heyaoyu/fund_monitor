@@ -54,9 +54,9 @@ def update_users_jobs():
                 if user in user_msg_filters_dict.keys():
                     user_msg_filters_dict.get(user).update(min, max)
                 else:
-                    user_msg_filters_dict[user] = UserMessageFilter(user, min, max)
+                    user_msg_filters_dict[user] = UserMessageFilter(user, uid, min, max)
             else:
-                fund_jobs[fund_code] = {user: UserMessageFilter(user, min, max)}
+                fund_jobs[fund_code] = {user: UserMessageFilter(user, uid, min, max)}
         for fund_code, user_msg_filters_dict in fund_jobs.items():
             job = FundMonitorJob(fund_code)
             job.attach_user_msg_filters(user_msg_filters_dict.values())

@@ -12,6 +12,8 @@ from main import user_msg_manager
 
 from datetime import timedelta, datetime
 
+import celery_mysql_task
+
 
 def is_A_market_opening():
     utc_ts = datetime.utcnow()
@@ -46,8 +48,9 @@ def millsecondsOfNow():
 
 
 class UserMessageFilter(object):
-    def __init__(self, user, min, max, interval=500):
+    def __init__(self, user, userid, min, max, interval=500):
         self.user = user
+        self.userid = userid
         self.min = float(min)
         self.max = float(max)
         self.interval = float(interval)
@@ -122,6 +125,8 @@ class FundMonitorJob(object):
                 bj_ts = utc_ts + timedelta(hours=8)
                 json_object['bjtime'] = bj_ts.strftime("%Y-%m-%d %H:%M:%S")
                 user_msg_manager.store_user_message_for(user_msg_filter.user, json.dumps(json_object))
+                celery_mysql_task.save_history_msg.apply_async(user_msg_filter.userid, millsecondsOfNow(), "job",
+                                                               json.dumps(json_object))
 
 
 class AdminMessageSource(object):
@@ -130,6 +135,7 @@ class AdminMessageSource(object):
 
     def send_msg(self, msg):
         user_msg_manager.store_all_users_message(msg)
+        celery_mysql_task.save_all_users_history_msg.apply_async(millsecondsOfNow(), "admin", msg)
 
 
 admin_source = AdminMessageSource()
